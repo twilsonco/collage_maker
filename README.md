@@ -27,7 +27,10 @@ optional arguments:
 
 Example:
 ```
-collage_maker.py -o my_collage.png -w 800 -i 250 -s
+collage_maker.py -o my_collage.png -w 1080 -h 1920 -i 250 -s
+```
+```
+multi_collage.py
 ```
 
 Description:
