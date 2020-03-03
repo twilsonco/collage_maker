@@ -10,7 +10,7 @@ import random
 from PIL import Image
 
 
-def make_collage(images, filename, width, init_height):
+def make_collage(images, filename, width=2000, init_height=250, fin_width=1920, fin_height=1080):
     """
     Make a collage image with a width equal to `width` from `images` and save to `filename`.
     """
@@ -18,7 +18,7 @@ def make_collage(images, filename, width, init_height):
         print('No images for collage found!')
         return False
 
-    margin_size = 2
+    margin_size = 0
     # run until a suitable arrangement of images is found
     while True:
         # copy images to images_list
@@ -77,7 +77,11 @@ def make_collage(images, filename, width, init_height):
                     collage_image.paste(img, (int(x), int(y)))
                 x += img.size[0] + margin_size
             y += int(init_height / coef) + margin_size
-    collage_image.save(filename)
+    # collage_image.save(filename)
+    # print(collage_image.size)
+    if collage_image.size[0] > fin_width and collage_image.size[1] > fin_height:
+        crop_image = collage_image.crop((0, 0, fin_width, fin_height))
+    crop_image.save(filename)
     return True
 
 
@@ -85,9 +89,14 @@ def main():
     # prepare argument parser
     parse = argparse.ArgumentParser(description='Photo collage maker')
     parse.add_argument('-f', '--folder', dest='folder', help='folder with images (*.jpg, *.jpeg, *.png)', default='.')
-    parse.add_argument('-o', '--output', dest='output', help='output collage image filename', default='collage.png')
-    parse.add_argument('-w', '--width', dest='width', type=int, help='resulting collage image width')
-    parse.add_argument('-i', '--init_height', dest='init_height', type=int, help='initial height for resize the images')
+    parse.add_argument('-o', '--output', dest='output',
+                       help='output collage image filename', default='collage.png')
+    parse.add_argument('-w', '--width', dest='width', type=int,
+                       help='resulting collage image width')
+    parse.add_argument('-i', '--init_height', dest='init_height',
+                       type=int, help='initial height for resize the images')
+    parse.add_argument('-h', '--height', dest='height',
+                       type=int, help='initial height for resize the images')
     parse.add_argument('-s', '--shuffle', action='store_true', dest='shuffle', help='enable images shuffle')
 
     args = parse.parse_args()
@@ -107,7 +116,8 @@ def main():
         random.shuffle(images)
 
     print('Making collage...')
-    res = make_collage(images, args.output, args.width, args.init_height)
+    res = make_collage(images, args.output, args.width,
+                       args.init_height,  args.width, args.height)
     if not res:
         print('Failed to create collage!')
         exit(1)
