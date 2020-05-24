@@ -89,6 +89,7 @@ def main():
     # prepare argument parser
     parse = argparse.ArgumentParser(description='Photo collage maker')
     parse.add_argument('-f', '--folder', dest='folder', help='folder with images (*.jpg, *.jpeg, *.png)', default='.')
+    parse.add_argument('-F', '--file', dest='file', help='file with newline separated list of files', default='.')
     parse.add_argument('-o', '--output', dest='output',
                        help='output collage image filename', default='collage.png')
     parse.add_argument('-w', '--width', dest='width', type=int,
@@ -98,6 +99,7 @@ def main():
     parse.add_argument('-h', '--height', dest='height',
                        type=int, help='initial height for resize the images')
     parse.add_argument('-s', '--shuffle', action='store_true', dest='shuffle', help='enable images shuffle')
+    parse.add_argument('-c', '--count', dest='count', type=int, help='count of images to use', default=10)
 
     args = parse.parse_args()
     if not args.width or not args.init_height:
@@ -105,8 +107,20 @@ def main():
         exit(1)
 
     # get images
-    files = [os.path.join(args.folder, fn) for fn in os.listdir(args.folder)]
-    images = [fn for fn in files if os.path.splitext(fn)[1].lower() in ('.jpg', '.jpeg', '.png')]
+    #files = [os.path.join(args.folder, fn) for fn in os.listdir(args.folder)]
+    #images = [fn for fn in files if os.path.splitext(fn)[1].lower() in ('.jpg', '.jpeg', '.png')]
+    
+    if args.file:
+         with open(args.file, 'r') as f:
+             for line in f:
+                 images.append(line.strip())
+    elif args.folder:
+         for root, dirs, files in os.walk(args.folder):
+             for name in files:
+                 if re.findall("jpg|png|jpeg", name.split(".")[-1]):
+                     fname = os.path.join(root, name)
+                     images.append(fname)
+    
     if not images:
         print('No images for making collage! Please select other directory with images!')
         exit(1)
@@ -114,7 +128,9 @@ def main():
     # shuffle images if needed
     if args.shuffle:
         random.shuffle(images)
-
+    
+    if args.count > 1:
+        images = images[:args.count]
     print('Making collage...')
     res = make_collage(images, args.output, args.width,
                        args.init_height,  args.width, args.height)
